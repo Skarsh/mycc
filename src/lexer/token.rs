@@ -1,12 +1,12 @@
 use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Identifier(String),
     Constant(u32),
 
     // Keywords
-    Int(i32),
+    Int,
     Void,
     Return,
 
@@ -15,7 +15,10 @@ pub enum Token {
     RParen,
     LBrace,
     RBrace,
-    SemiColon,
+    Semicolon,
+
+    Eof,
+    Illegal,
 }
 
 // By implementing Display here we get the String::to_string trait for free.
@@ -24,14 +27,16 @@ impl Display for Token {
         match self {
             Self::Identifier(val) => write!(f, "{}", val),
             Self::Constant(val) => write!(f, "{}", val),
-            Self::Int(val) => write!(f, "{}", val),
+            Self::Int => write!(f, "int"),
             Self::Void => write!(f, "void"),
             Self::Return => write!(f, "return"),
             Self::LParen => write!(f, "("),
             Self::RParen => write!(f, ")"),
             Self::LBrace => write!(f, "{{"),
             Self::RBrace => write!(f, "}}"),
-            Self::SemiColon => write!(f, ";"),
+            Self::Semicolon => write!(f, ";"),
+            Self::Eof => write!(f, "EOF"),
+            Self::Illegal => write!(f, "illegal"),
         }
     }
 }
@@ -40,9 +45,9 @@ impl Display for Token {
 mod tests {
     use super::*;
 
-    struct TestCase {
+    struct TestCase<'a> {
         token: Token,
-        value: String,
+        literal: &'a str,
     }
 
     #[test]
@@ -50,52 +55,48 @@ mod tests {
         let test_cases: &[_] = &[
             TestCase {
                 token: Token::Identifier("my_var".to_string()),
-                value: "my_var".to_string(),
+                literal: "my_var",
             },
             TestCase {
                 token: Token::Constant(42),
-                value: "42".to_string(),
+                literal: "42",
             },
             TestCase {
-                token: Token::Int(14),
-                value: "14".to_string(),
-            },
-            TestCase {
-                token: Token::Int(-14),
-                value: "-14".to_string(),
+                token: Token::Int,
+                literal: "int",
             },
             TestCase {
                 token: Token::Void,
-                value: "void".to_string(),
+                literal: "void",
             },
             TestCase {
                 token: Token::Return,
-                value: "return".to_string(),
+                literal: "return",
             },
             TestCase {
                 token: Token::LParen,
-                value: "(".to_string(),
+                literal: "(",
             },
             TestCase {
                 token: Token::RParen,
-                value: ")".to_string(),
+                literal: ")",
             },
             TestCase {
                 token: Token::LBrace,
-                value: "{".to_string(),
+                literal: "{",
             },
             TestCase {
                 token: Token::RBrace,
-                value: "}".to_string(),
+                literal: "}",
             },
             TestCase {
-                token: Token::SemiColon,
-                value: ";".to_string(),
+                token: Token::Semicolon,
+                literal: ";",
             },
         ];
 
         for case in test_cases {
-            assert_eq!(case.token.to_string(), case.value)
+            assert_eq!(case.token.to_string(), case.literal)
         }
     }
 }
