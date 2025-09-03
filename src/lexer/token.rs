@@ -10,7 +10,7 @@ pub enum Token {
     Void,
     Return,
 
-    // Operators
+    // Delimiters
     LParen,
     RParen,
     LBrace,

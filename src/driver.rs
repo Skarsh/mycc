@@ -1,8 +1,11 @@
 use std::fs;
 use std::process::Command;
 
+use crate::lexer::Lexer;
+use crate::lexer::token::Token;
+
 #[derive(Debug)]
-pub enum Flag {
+pub enum CompileFlag {
     Lex,
     Parse,
     Codgen,
@@ -21,10 +24,22 @@ pub fn preproccess(in_path: &str, out_path: &str) {
     }
 }
 
-// TODO: Just STUBBED out for now
+// TODO(Thomas): Doesn't produce an assembly file yet
+// TODO(Thomas): This should take a CompileFlag and do actions accordingly
 pub fn compile(in_path: &str) {
     println!("Compiling!");
-    // TODO: Add our compilation step here
+
+    // read contents of the preprocessed file
+    // lex the contents
+    let source: String = fs::read_to_string(in_path).unwrap();
+    let mut tokens: Vec<Token> = Vec::new();
+    let mut lexer = Lexer::new(source.as_str());
+    while let Some(token) = lexer.next_token() {
+        tokens.push(token);
+    }
+
+    println!("tokens: {:?}", tokens);
+
     fs::remove_file(in_path).expect("failed to remove file");
 }
 
@@ -44,11 +59,11 @@ pub fn assemble_and_link(in_path: &str, out_path: &str) {
     }
 }
 
-pub fn parse_flag(input: &str) -> Flag {
+pub fn parse_flag(input: &str) -> CompileFlag {
     match input {
-        "--lex" => Flag::Lex,
-        "--parse" => Flag::Parse,
-        "--codegen" => Flag::Codgen,
+        "--lex" => CompileFlag::Lex,
+        "--parse" => CompileFlag::Parse,
+        "--codegen" => CompileFlag::Codgen,
         _ => panic!("illegal flag"),
     }
 }

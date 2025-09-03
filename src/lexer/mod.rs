@@ -1,6 +1,6 @@
 use crate::lexer::token::Token;
 
-mod token;
+pub mod token;
 
 pub struct Lexer {
     source: Vec<char>,
@@ -15,34 +15,48 @@ impl Lexer {
         }
     }
 
-    pub fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Option<Token> {
         self.skip_whitespace();
-        let mut token = Token::Illegal;
+        let mut token = None;
         if let Some(ch) = self.read_char() {
             match ch {
-                '(' => token = Token::LParen,
-                ')' => token = Token::RParen,
-                '{' => token = Token::LBrace,
-                '}' => token = Token::RBrace,
-                ';' => token = Token::Semicolon,
+                '(' => {
+                    token = Some(Token::LParen);
+                    self.advance();
+                }
+                ')' => {
+                    token = Some(Token::RParen);
+                    self.advance();
+                }
+                '{' => {
+                    token = Some(Token::LBrace);
+                    self.advance();
+                }
+                '}' => {
+                    token = Some(Token::RBrace);
+                    self.advance();
+                }
+                ';' => {
+                    token = Some(Token::Semicolon);
+                    self.advance();
+                }
                 _ => {
                     if ch.is_digit(10) {
                         let constant: u32 = self.read_constant();
-                        token = Token::Constant(constant);
+                        token = Some(Token::Constant(constant));
                     } else if ch.is_alphabetic() {
                         let ident = self.read_identifier();
 
                         match ident.as_str() {
-                            "int" => token = Token::Int,
-                            "void" => token = Token::Void,
-                            "return" => token = Token::Return,
-                            _ => token = Token::Identifier(ident),
+                            "int" => token = Some(Token::Int),
+                            "void" => token = Some(Token::Void),
+                            "return" => token = Some(Token::Return),
+                            _ => token = Some(Token::Identifier(ident)),
                         }
                     }
                 }
             }
         }
-        self.advance();
         token
     }
 
@@ -101,24 +115,30 @@ mod tests {
 
     #[test]
     fn lex_tokens() {
+        let test_program = r#"int main(void) {
+    return 2;
+}
+        "#;
+
         let expected_tokens: &[_] = &[
             Token::Int,
-            Token::Identifier("var".to_string()),
-            Token::Constant(123),
+            Token::Identifier("main".to_string()),
             Token::LParen,
+            Token::Void,
             Token::RParen,
             Token::LBrace,
-            Token::RBrace,
-            Token::Semicolon,
-            Token::Void,
             Token::Return,
+            Token::Constant(2),
+            Token::Semicolon,
+            Token::RBrace,
         ];
 
-        let my_str = "int var 123 () {}; void return";
-        let mut lexer = Lexer::new(my_str);
+        let mut lexer = Lexer::new(test_program);
 
         for token in expected_tokens {
-            let tkn = lexer.next_token();
+            println!("expected token: {:?}", token);
+            let tkn = lexer.next_token().unwrap();
+            println!("tkn: {:?}", tkn);
             assert_eq!(*token, tkn);
         }
     }
