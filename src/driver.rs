@@ -8,54 +8,76 @@ use crate::lexer::token::Token;
 pub enum CompileFlag {
     Lex,
     Parse,
-    Codgen,
+    Codegen,
 }
 
-pub fn preproccess(in_path: &str, out_path: &str) {
-    println!("Preprocssing!");
-    let output = Command::new("gcc")
-        .args(["-E", "-P", in_path, "-o", out_path])
-        .output()
-        .expect("failed to execute process");
-
-    if !output.status.success() {
-        let error_msg = String::from_utf8_lossy(&output.stderr);
-        eprintln!("Preproccesing failed.\n{}\n{}", output.status, error_msg);
-    }
+pub struct Compiler {
+    lexer: Lexer,
+    tokens: Vec<Token>,
 }
 
-// TODO(Thomas): Doesn't produce an assembly file yet
-// TODO(Thomas): This should take a CompileFlag and do actions accordingly
-pub fn compile(in_path: &str) {
-    println!("Compiling!");
-
-    // read contents of the preprocessed file
-    // lex the contents
-    let source: String = fs::read_to_string(in_path).unwrap();
-    let mut tokens: Vec<Token> = Vec::new();
-    let mut lexer = Lexer::new(source.as_str());
-    while let Some(token) = lexer.next_token() {
-        tokens.push(token);
+impl Compiler {
+    pub fn new() -> Self {
+        Self {
+            lexer: Lexer::new(""),
+            tokens: Vec::new(),
+        }
     }
 
-    println!("tokens: {:?}", tokens);
+    pub fn run(&mut self, source_path: &str, flag: CompileFlag) {
+        let preprocessed_out_path = "../preprocessed.i";
+        Self::preprocess(source_path, preprocessed_out_path);
 
-    fs::remove_file(in_path).expect("failed to remove file");
-}
+        let preprocessed_source_contents = fs::read_to_string(preprocessed_out_path).unwrap();
 
-pub fn assemble_and_link(in_path: &str, out_path: &str) {
-    println!("Assembling and linking!");
-    let output = Command::new("gcc")
-        .args([in_path, "-o", out_path])
-        .output()
-        .expect("failed to execute process");
+        self.lexer = Lexer::new(&preprocessed_source_contents);
+        self.compile(flag);
 
-    if !output.status.success() {
-        let error_msg = String::from_utf8_lossy(&output.stderr);
-        eprintln!(
-            "Assemble and linking failed.\n {}\n{}",
-            output.status, error_msg
-        )
+        fs::remove_file(preprocessed_out_path).expect("failed to remove file");
+
+        Self::assemble_and_link(".s", "");
+    }
+
+    pub fn preprocess(in_path: &str, out_path: &str) {
+        println!("Preprocssing!");
+        let output = Command::new("gcc")
+            .args(["-E", "-P", in_path, "-o", out_path])
+            .output()
+            .expect("failed to execute process");
+
+        if !output.status.success() {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            eprintln!("Preproccesing failed.\n{}\n{}", output.status, error_msg);
+        }
+    }
+
+    pub fn compile(&mut self, flag: CompileFlag) {
+        match flag {
+            CompileFlag::Lex => {
+                while let Some(token) = self.lexer.next_token() {
+                    self.tokens.push(token);
+                }
+                println!("tokens: {:?}", self.tokens)
+            }
+            CompileFlag::Parse => todo!(),
+            CompileFlag::Codegen => todo!(),
+        }
+    }
+
+    pub fn assemble_and_link(in_path: &str, out_path: &str) {
+        println!("Assembling and linking!");
+        let output = Command::new("gcc")
+            .args([in_path, "-o", out_path])
+            .output()
+            .expect("failed to execute process");
+
+        if !output.status.success() {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            eprintln!(
+                "Assemble and linking failed.\n {}\n{}",
+                output.status, error_msg
+            )
+        }
     }
 }
 
@@ -63,7 +85,7 @@ pub fn parse_flag(input: &str) -> CompileFlag {
     match input {
         "--lex" => CompileFlag::Lex,
         "--parse" => CompileFlag::Parse,
-        "--codegen" => CompileFlag::Codgen,
+        "--codegen" => CompileFlag::Codegen,
         _ => panic!("illegal flag"),
     }
 }

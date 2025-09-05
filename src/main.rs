@@ -1,8 +1,7 @@
 mod driver;
 mod lexer;
 
-use crate::driver::{CompileFlag, assemble_and_link, compile, parse_flag, preproccess};
-use crate::lexer::Lexer;
+use crate::driver::{CompileFlag, Compiler, parse_flag};
 use std::env;
 
 fn main() {
@@ -11,19 +10,11 @@ fn main() {
 
     let src_file_path = &args[1];
 
-    let mut flag: Option<CompileFlag> = None;
+    let mut flag: CompileFlag = CompileFlag::Codegen;
     if args.len() > 2 {
-        flag = Some(parse_flag(&args[2]));
+        flag = parse_flag(&args[2]);
     }
 
-    let preprocessed_out_path = "../preprocessed.i";
-
-    // Preprocess
-    preproccess(src_file_path, preprocessed_out_path);
-
-    // Compile preprocessed file
-    compile(preprocessed_out_path);
-
-    // Assemble and link
-    assemble_and_link(".s", "");
+    let mut compiler = Compiler::new();
+    compiler.run(src_file_path, flag);
 }

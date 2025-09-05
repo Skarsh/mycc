@@ -2,6 +2,7 @@ use crate::lexer::token::{Token, TokenKind, TokenSpan};
 
 pub mod token;
 
+#[derive(Debug)]
 pub struct Lexer {
     source: Vec<char>,
     position: usize,
@@ -61,7 +62,7 @@ impl Lexer {
                     self.advance();
                 }
                 _ => {
-                    if ch.is_digit(10) {
+                    if ch.is_ascii_digit() {
                         let constant: String = self.read_constant();
                         token = Some(Token::new(
                             TokenKind::Constant,
@@ -150,7 +151,7 @@ impl Lexer {
         self.source.get(self.position)
     }
 
-    fn peek_char(&self) -> Option<&char> {
+    fn _peek_char(&self) -> Option<&char> {
         self.source.get(self.position + 1)
     }
 }

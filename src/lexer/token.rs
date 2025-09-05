@@ -15,8 +15,8 @@ pub enum TokenKind {
     RBrace,
     Semicolon,
 
-    Eof,
-    Illegal,
+    _Eof,
+    _Illegal,
 }
 
 #[derive(Debug, PartialEq)]
