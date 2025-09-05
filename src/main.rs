@@ -1,7 +1,7 @@
 mod driver;
 mod lexer;
 
-use crate::driver::{Flag, assemble_and_link, compile, parse_flag, preproccess};
+use crate::driver::{CompileFlag, assemble_and_link, compile, parse_flag, preproccess};
 use crate::lexer::Lexer;
 use std::env;
 
@@ -11,7 +11,7 @@ fn main() {
 
     let src_file_path = &args[1];
 
-    let mut flag: Option<Flag> = None;
+    let mut flag: Option<CompileFlag> = None;
     if args.len() > 2 {
         flag = Some(parse_flag(&args[2]));
     }
