@@ -64,7 +64,7 @@ impl Compiler {
         }
     }
 
-    pub fn assemble_and_link(in_path: &str, out_path: &str) {
+    pub fn _assemble_and_link(in_path: &str, out_path: &str) {
         println!("Assembling and linking!");
         let output = Command::new("gcc")
             .args([in_path, "-o", out_path])
@@ -86,6 +86,6 @@ pub fn parse_flag(input: &str) -> CompileFlag {
         "--lex" => CompileFlag::Lex,
         "--parse" => CompileFlag::Parse,
         "--codegen" => CompileFlag::Codegen,
-        _ => panic!("illegal flag: {}", input),
+        _ => panic!("illegal flag: {input}"),
     }
 }

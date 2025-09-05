@@ -69,7 +69,7 @@ impl Lexer {
                             TokenSpan::new(0, 0),
                             constant,
                         ));
-                    } else if ch.is_alphabetic() {
+                    } else if Self::is_letter(*ch) {
                         let ident = self.read_identifier();
 
                         match ident.as_str() {
@@ -112,7 +112,7 @@ impl Lexer {
     fn read_identifier(&mut self) -> String {
         let start_pos = self.position;
         while let Some(ch) = self.read_char() {
-            if ch.is_alphanumeric() {
+            if Self::is_letter(*ch) {
                 self.advance();
             } else {
                 break;
@@ -149,6 +149,10 @@ impl Lexer {
 
     fn read_char(&self) -> Option<&char> {
         self.source.get(self.position)
+    }
+
+    fn is_letter(ch: char) -> bool {
+        ch.is_ascii_lowercase() || ch.is_ascii_uppercase() || ch == '_'
     }
 
     fn _peek_char(&self) -> Option<&char> {

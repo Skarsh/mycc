@@ -8,7 +8,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     println!("{:?}", env::current_dir().unwrap());
 
-    let mut src_file_path = "";
+    let src_file_path;
     let mut flag: CompileFlag = CompileFlag::Codegen;
     if args.len() > 2 {
         src_file_path = &args[2];
