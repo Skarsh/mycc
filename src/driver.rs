@@ -35,7 +35,7 @@ impl Compiler {
 
         fs::remove_file(preprocessed_out_path).expect("failed to remove file");
 
-        Self::assemble_and_link(".s", "");
+        //Self::assemble_and_link(".s", "");
     }
 
     pub fn preprocess(in_path: &str, out_path: &str) {
@@ -86,6 +86,6 @@ pub fn parse_flag(input: &str) -> CompileFlag {
         "--lex" => CompileFlag::Lex,
         "--parse" => CompileFlag::Parse,
         "--codegen" => CompileFlag::Codegen,
-        _ => panic!("illegal flag"),
+        _ => panic!("illegal flag: {}", input),
     }
 }
